@@ -16,21 +16,24 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18  # Oder deine Version
+          node-version: 18  # Oder deine Node.js-Version
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install Dependencies
-        run: |
-          cd backend
-          npm install
+        working-directory: backend
+        run: npm install
 
       - name: Build Backend
-        run: |
-          cd backend
-          npm run build  # Falls du ein Build-Skript hast
+        working-directory: backend
+        run: npm run build  # Falls du ein Build-Skript hast
+
+      - name: Zip Backend
+        run: zip -r backend.zip backend
 
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v2
         with:
           app-name: "coachinvoice-backend"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./backend  # Falls dein Code in 'backend/' liegt
+          package: backend.zip
